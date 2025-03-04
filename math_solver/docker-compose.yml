@@ -1,0 +1,36 @@
+services:
+  ollama:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    command: >
+      sh -c "ollama serve & sleep 5 && ollama pull erwan2/DeepSeek-R1-Distill-Qwen-7B && tail -f /dev/null"
+    networks:
+      - ollama-network
+
+  gradio:
+    build:
+      context: ./math_solver
+      dockerfile: Dockerfile
+    ports:
+      - "7861:7861"
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    command: >
+      sh -c "while ! curl -s http://ollama:11434 > /dev/null; do echo 'Waiting for Ollama...'; sleep 1; done && python app.py"
+    networks:
+      - ollama-network
+
+volumes:
+  ollama-data:
+
+
+networks:
+  ollama-network:
+    driver: bridge

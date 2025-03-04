@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  ml-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    depends_on:
+      - mongo
+    networks:
+      - ml-network
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - ml-network
+
+volumes:
+  mongo_data:
+
+
+networks:
+  ml-network:
+    driver: bridge
+
+# docker-compose up -d 
+# docker-compose down
